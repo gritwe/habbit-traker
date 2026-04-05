@@ -1,0 +1,83 @@
+.page{display:flex;flex-direction:column;height:100%;overflow:hidden;}
+.header{background:white;padding:12px 20px;border-bottom:0.5px solid var(--border);flex-shrink:0;}
+.tabs{display:flex;gap:8px;justify-content:center;}
+.tabBtn{padding:8px 28px;border-radius:20px;font-size:14px;font-weight:600;color:var(--text-muted);transition:all 0.15s;}
+.tabActive{background:var(--green-light);color:var(--green-dark);}
+.scroll{flex:1;overflow-y:auto;padding:12px 14px 0;}
+.scroll::-webkit-scrollbar{display:none;}
+.centered{display:flex;justify-content:center;padding:24px;}
+
+.block{padding:14px 16px;margin-bottom:10px;}
+.blockHeader{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.blockTitle{font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:0;}
+.addRowBtn{font-size:13px;font-weight:600;color:var(--green);}
+
+/* Timeline */
+.timeline{display:flex;flex-direction:column;gap:0;}
+.timelineItem{display:flex;gap:0;align-items:stretch;min-height:48px;}
+.timelineLeft{display:flex;flex-direction:column;align-items:center;width:54px;flex-shrink:0;}
+.timeTag{font-size:12px;font-weight:700;color:#007AFF;margin-bottom:4px;flex-shrink:0;}
+.timelineLine{flex:1;width:2px;background:var(--border);border-radius:1px;min-height:8px;}
+.timelineCard{flex:1;display:flex;align-items:center;gap:8px;background:var(--bg);border-radius:10px;padding:8px 10px;margin-bottom:6px;}
+.timelineCard.timelineCardDone{opacity:0.6;}
+.tlCheck{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.2s;background:white;}
+.tlCheckOn{background:var(--green);border-color:var(--green);}
+.tlTitle{flex:1;font-size:14px;font-weight:500;color:var(--text);}
+.tlTitle.tlDone{text-decoration:line-through;color:var(--text-muted);}
+.tlDel{font-size:12px;color:var(--text-hint);padding:4px;}
+.tlDel:active{color:#FF3B30;}
+
+/* Mood */
+.moodRow{display:flex;justify-content:space-between;gap:8px;}
+.moodBtn{flex:1;height:48px;border-radius:12px;border:1.5px solid var(--border);background:var(--bg);font-size:24px;display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
+.moodBtn.moodSel{border-color:var(--green);background:var(--green-light);}
+
+/* Note */
+.noteArea{width:100%;border:none;outline:none;background:transparent;font-size:15px;color:var(--text);resize:none;line-height:1.6;font-family:inherit;}
+.noteArea::placeholder{color:var(--text-hint);}
+.saveNoteBtn{font-size:13px;font-weight:600;color:var(--green);margin-top:10px;padding:4px 0;}
+.saveNoteBtn:disabled{color:var(--text-hint);}
+
+/* Add form */
+.addForm{border-top:0.5px solid var(--border);padding-top:12px;margin-bottom:8px;}
+.simpleForm{border-top:0.5px solid var(--border);padding-top:12px;margin-bottom:8px;}
+.formRow{display:flex;gap:8px;margin-bottom:8px;}
+.input{flex:1;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:15px;color:var(--text);background:var(--bg);outline:none;font-family:inherit;}
+.input:focus{border-color:var(--green);}
+.timeInput{width:96px;padding:10px 8px;border:1.5px solid var(--border);border-radius:10px;font-size:15px;color:var(--text);background:var(--bg);outline:none;flex-shrink:0;}
+.timeInput:focus{border-color:var(--green);}
+.formBtns{display:flex;gap:8px;}
+.cancelBtn{flex:1;padding:10px;border-radius:10px;font-size:14px;font-weight:600;color:var(--text-muted);background:var(--bg);}
+.saveBtnGreen{flex:2;padding:10px;border-radius:10px;font-size:14px;font-weight:700;color:white;background:var(--green);}
+.saveBtnGreen:disabled{opacity:0.4;}
+
+.emptyHint{font-size:13px;color:var(--text-hint);text-align:center;padding:10px 0;}
+
+/* Calendar */
+.calBlock{padding:12px 14px;margin-bottom:10px;}
+.calHeader{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.calTitle{font-size:15px;font-weight:700;color:var(--text);}
+.calNav{width:32px;height:32px;border-radius:50%;font-size:20px;color:var(--text-muted);display:flex;align-items:center;justify-content:center;}
+.calNav:hover{background:var(--green-light);}
+.calWd{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:4px;}
+.calWdl{text-align:center;font-size:10px;font-weight:600;color:var(--text-muted);}
+.calGrid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+.calCell{aspect-ratio:1;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--text);border:1.5px solid transparent;transition:all 0.15s;}
+.calCell:not(.calEmpty):hover{background:var(--green-light);}
+.calToday{border-color:var(--green);}
+.calSel{background:var(--green);color:white;border-color:var(--green);}
+.calEmpty{pointer-events:none;}
+
+/* Tasks checklist */
+.taskHeader{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
+.taskSub{font-size:11px;color:var(--text-muted);margin-top:2px;}
+.addTaskChip{font-size:13px;font-weight:600;color:var(--green);background:var(--green-light);padding:6px 14px;border-radius:20px;flex-shrink:0;}
+.miniBar{height:4px;background:var(--border);border-radius:10px;overflow:hidden;margin-bottom:12px;}
+.miniBarFill{height:100%;background:var(--green);border-radius:10px;transition:width 0.3s ease;}
+.taskRow{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:0.5px solid var(--border);}
+.taskCheck{width:22px;height:22px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.2s;background:white;}
+.taskCheckOn{background:var(--green);border-color:var(--green);}
+.taskTitle{flex:1;font-size:14px;font-weight:500;color:var(--text);}
+.taskTitle.taskDone{text-decoration:line-through;color:var(--text-muted);}
+.taskDel{font-size:13px;color:var(--text-hint);padding:4px;flex-shrink:0;}
+.taskDel:active{color:#FF3B30;}

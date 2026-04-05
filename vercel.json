@@ -1,0 +1,21 @@
+{
+  "buildCommand": "cd frontend && npm install && npm run build",
+  "outputDirectory": "frontend/dist",
+  "rewrites": [
+    { "source": "/api/habits/:id/toggle", "destination": "/api/habits" },
+    { "source": "/api/habits/:id", "destination": "/api/habits" },
+    { "source": "/api/habits", "destination": "/api/habits" },
+    { "source": "/api/goals/:id", "destination": "/api/goals" },
+    { "source": "/api/goals", "destination": "/api/goals" },
+    { "source": "/api/affirmations/:id", "destination": "/api/affirmations" },
+    { "source": "/api/affirmations", "destination": "/api/affirmations" },
+    { "source": "/api/gratitude/:id", "destination": "/api/gratitude" },
+    { "source": "/api/gratitude", "destination": "/api/gratitude" },
+    { "source": "/api/journal", "destination": "/api/journal" },
+    { "source": "/api/stats", "destination": "/api/stats" },
+    { "source": "/api/daytasks/:id", "destination": "/api/daytasks" },
+    { "source": "/api/daytasks", "destination": "/api/daytasks" },
+    { "source": "/api/events/:id", "destination": "/api/events" },
+    { "source": "/api/events", "destination": "/api/events" }
+  ]
+}

@@ -1,0 +1,32 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --green: #34C759; --green-dark: #248A3D; --green-light: #E8F8ED;
+  --bg: #f2f2f7; --card: #ffffff;
+  --text: #1c1c1e; --text-muted: #6d6d72; --text-hint: #aeaeb2;
+  --border: #e5e5ea; --radius: 14px; --radius-sm: 10px;
+  --red: #FF3B30; --blue: #007AFF; --orange: #FF9500; --purple: #AF52DE;
+}
+body {
+  font-family: -apple-system, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--text);
+  min-height: 100vh; -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+button { cursor: pointer; font-family: inherit; border: none; background: none; }
+input, textarea { font-family: inherit; }
+.card { background: var(--card); border-radius: var(--radius); border: 0.5px solid var(--border); }
+.btn-primary {
+  background: var(--green); color: white; border-radius: var(--radius);
+  padding: 14px; font-size: 16px; font-weight: 700; width: 100%; transition: opacity 0.15s;
+}
+.btn-primary:active { opacity: 0.8; }
+.btn-primary:disabled { opacity: 0.4; }
+.spinner {
+  width: 28px; height: 28px; border: 3px solid var(--border);
+  border-top-color: var(--green); border-radius: 50%;
+  animation: spin 0.7s linear infinite; margin: auto;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes slideUp { from { transform: translateY(20px); opacity:0; } to { transform: translateY(0); opacity:1; } }
+@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+@keyframes popIn { from { transform: scale(0.85); opacity:0; } to { transform: scale(1); opacity:1; } }
