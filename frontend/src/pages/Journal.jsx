@@ -9,9 +9,21 @@ const WD = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 
 function toStr(d) { return d.toISOString().split('T')[0]; }
 
+const MONTHS_SHORT = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+
+function fmtDateShort(s) {
+  const d = new Date(s + 'T00:00:00');
+  const today = toStr(new Date());
+  const yesterday = toStr(new Date(Date.now() - 86400000));
+  if (s === today) return 'Сегодня';
+  if (s === yesterday) return 'Вчера';
+  return `${d.getDate()} ${MONTHS_SHORT[d.getMonth()]}`;
+}
+
 // ── ПЛАН ДНЯ ─────────────────────────────────────────────
 function PlanDay() {
-  const today = toStr(new Date());
+  const todayStr = toStr(new Date());
+  const [date, setDate] = useState(todayStr);
   const [mood, setMood] = useState(null);
   const [note, setNote] = useState('');
   const [saved, setSaved] = useState(false);
@@ -24,24 +36,36 @@ function PlanDay() {
   const { haptic } = useTelegram();
 
   useEffect(() => {
-    api.getJournal(today).then(data => {
+    setMood(null); setNote(''); setTimedTasks([]); setSaved(false);
+    api.getJournal(date).then(data => {
       if (data) { setMood(data.mood); setNote(data.note || ''); }
     }).catch(() => {});
-    api.getDayTasks(today).then(all => {
+    api.getDayTasks(date).then(all => {
       setTimedTasks(all.filter(t => t.time_start));
     }).catch(() => {});
-  }, []);
+  }, [date]);
+
+  function goDate(delta) {
+    const d = new Date(date + 'T00:00:00');
+    d.setDate(d.getDate() + delta);
+    const next = toStr(d);
+    if (next > todayStr) return;
+    setDate(next);
+    setShowForm(false);
+  }
+
+  const isToday = date === todayStr;
 
   async function handleMood(v) {
     setMood(v);
     haptic?.impactOccurred('light');
-    await api.saveJournal({ entry_date: today, mood: v, note });
+    await api.saveJournal({ entry_date: date, mood: v, note });
   }
 
   async function saveNote() {
     setSaving(true);
     try {
-      await api.saveJournal({ entry_date: today, mood, note });
+      await api.saveJournal({ entry_date: date, mood, note });
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     } catch {}
@@ -52,7 +76,7 @@ function PlanDay() {
     if (!title.trim() || !time) return;
     setAddSaving(true);
     try {
-      const t = await api.createDayTask({ title, task_date: today, time_start: time });
+      const t = await api.createDayTask({ title, task_date: date, time_start: time });
       setTimedTasks(ts => [...ts, t].sort((a,b) => a.time_start.localeCompare(b.time_start)));
       setTitle(''); setTime(''); setShowForm(false);
       haptic?.impactOccurred('light');
@@ -73,6 +97,18 @@ function PlanDay() {
 
   return (
     <div className={styles.scroll}>
+      {/* Date nav */}
+      <div className={styles.dateNav}>
+        <button className={styles.dateNavBtn} onClick={() => goDate(-1)}>‹</button>
+        <div className={styles.dateNavCenter}>
+          <span className={styles.dateNavLabel}>{fmtDateShort(date)}</span>
+          {!isToday && (
+            <button className={styles.todayChip} onClick={() => setDate(todayStr)}>Сегодня</button>
+          )}
+        </div>
+        <button className={styles.dateNavBtn} onClick={() => goDate(1)} disabled={isToday}>›</button>
+      </div>
+
       {/* Timed schedule */}
       <div className={`card ${styles.block}`}>
         <div className={styles.blockHeader}>

@@ -7,6 +7,15 @@
 .scroll::-webkit-scrollbar{display:none;}
 .centered{display:flex;justify-content:center;padding:24px;}
 
+/* Date navigation */
+.dateNav{display:flex;align-items:center;justify-content:space-between;padding:10px 0 4px;}
+.dateNavBtn{width:36px;height:36px;border-radius:50%;font-size:22px;color:var(--text-muted);display:flex;align-items:center;justify-content:center;transition:background 0.15s;}
+.dateNavBtn:hover{background:var(--green-light);}
+.dateNavBtn:disabled{opacity:0.25;}
+.dateNavCenter{flex:1;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.dateNavLabel{font-size:16px;font-weight:700;color:var(--text);}
+.todayChip{font-size:12px;color:var(--green);font-weight:600;background:var(--green-light);padding:3px 12px;border-radius:20px;}
+
 .block{padding:14px 16px;margin-bottom:10px;}
 .blockHeader{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
 .blockTitle{font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:0;}
