@@ -43,17 +43,47 @@ module.exports = async function handler(req, res) {
     return res.json({ ok: true });
   }
 
-  // GET /api/habits
+  // GET /api/habits — with real consecutive streak
   if (req.method === 'GET') {
     const today = new Date().toISOString().split('T')[0];
-    const { rows } = await pool.query(
+    const { rows: habits } = await pool.query(
       `SELECT h.id, h.name, h.icon, h.color,
-        COALESCE((SELECT TRUE FROM habit_logs l WHERE l.habit_id=h.id AND l.completed_date=$2),FALSE) AS completed_today,
-        (SELECT COUNT(*) FROM habit_logs l2 WHERE l2.habit_id=h.id) AS streak
+        COALESCE((SELECT TRUE FROM habit_logs l WHERE l.habit_id=h.id AND l.completed_date=$2),FALSE) AS completed_today
        FROM habits h WHERE h.user_id=$1 AND h.is_active=TRUE ORDER BY h.created_at ASC`,
       [user.id, today]
     );
-    return res.json(rows);
+
+    // Calculate real consecutive streak for each habit
+    for (const habit of habits) {
+      const { rows: logs } = await pool.query(
+        `SELECT completed_date::text FROM habit_logs
+         WHERE habit_id=$1 ORDER BY completed_date DESC`,
+        [habit.id]
+      );
+
+      const dates = new Set(logs.map(r => r.completed_date));
+      let streak = 0;
+      const cur = new Date(today);
+
+      // If not done today, start checking from yesterday
+      if (!habit.completed_today) {
+        cur.setDate(cur.getDate() - 1);
+      }
+
+      while (true) {
+        const ds = cur.toISOString().split('T')[0];
+        if (dates.has(ds)) {
+          streak++;
+          cur.setDate(cur.getDate() - 1);
+        } else {
+          break;
+        }
+      }
+
+      habit.streak = streak;
+    }
+
+    return res.json(habits);
   }
 
   // POST /api/habits
