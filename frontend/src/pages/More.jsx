@@ -218,7 +218,7 @@ export function More() {
           ))}
         </div>
 
-        <p className={styles.version}>Трекер привычек v2.0</p>
+        <p className={styles.version}>Трекер привычек</p>
         <div style={{ height: 24 }} />
       </div>
     </div>
