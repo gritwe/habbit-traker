@@ -152,22 +152,7 @@ export function TimePicker({ value, onChange, onConfirm }) {
 
   return (
     <div className={styles.wrap}>
-      {/* Digital display */}
-      <div className={styles.digital}>
-        <button
-          className={`${styles.digitalPart} ${mode === 'hour' ? styles.digitalActive : ''}`}
-          onClick={() => setMode('hour')}
-        >
-          {numToStr(hour)}
-        </button>
-        <span className={styles.digitalColon}>:</span>
-        <button
-          className={`${styles.digitalPart} ${mode === 'minute' ? styles.digitalActive : ''}`}
-          onClick={() => setMode('minute')}
-        >
-          {numToStr(minute)}
-        </button>
-      </div>
+
 
       {/* Manual keyboard input */}
       <input
