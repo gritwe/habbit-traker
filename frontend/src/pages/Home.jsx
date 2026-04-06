@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { api } from '../api/index.js';
 import { useTelegram } from '../hooks/useTelegram.js';
+import { useSwipe } from '../hooks/useSwipe.js';
 import styles from './Home.module.css';
 
 const MONTHS = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
@@ -43,6 +44,11 @@ export function Home() {
   const [gratitude, setGratitude] = useState([]);
   const [loading, setLoading] = useState(true);
   const [habitsCollapsed, setHabitsCollapsed] = useState(false);
+
+  const swipe = useSwipe(
+    () => goDate(1),
+    () => goDate(-1),
+  );
 
   const isToday = date === toStr(new Date());
 
@@ -139,7 +145,7 @@ export function Home() {
       {loading ? (
         <div className={styles.centered}><div className="spinner" /></div>
       ) : (
-        <div className={styles.scroll}>
+        <div className={styles.scroll} {...swipe}>
 
           {tab === 'stats' && <>
             {/* Habits block */}

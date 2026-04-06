@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { api } from '../api/index.js';
 import { useTelegram } from '../hooks/useTelegram.js';
+import { useSwipe } from '../hooks/useSwipe.js';
+import { TimePicker } from '../components/TimePicker.jsx';
 import styles from './Journal.module.css';
 
 const MOODS = [{v:1,e:'😞'},{v:2,e:'😕'},{v:3,e:'😐'},{v:4,e:'😊'},{v:5,e:'🤩'}];
@@ -100,8 +102,21 @@ function PlanDay() {
     await api.deleteDayTask(id);
   }
 
+  const swipe = useSwipe(
+    () => goDate(1),
+    () => goDate(-1),
+  );
+
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  const [pickerTime, setPickerTime] = useState('08:00');
+
+  function handleTimeConfirm(t) {
+    setTime(t);
+    setShowTimePicker(false);
+  }
+
   return (
-    <div className={styles.scroll}>
+    <div className={styles.scroll} {...swipe}>
       {/* Date nav */}
       <div className={styles.dateNav}>
         <button className={styles.dateNavBtn} onClick={() => goDate(-1)}>‹</button>
@@ -137,13 +152,22 @@ function PlanDay() {
         {/* Add form — full width, time on top, title below, then buttons */}
         {showForm && (
           <div className={styles.addFormFull}>
-            <input
-              className={styles.timeInputFull}
-              type="time"
-              value={time}
-              onChange={e => setTime(e.target.value)}
-              autoFocus
-            />
+            <button
+              className={styles.timePickerBtn}
+              onClick={() => setShowTimePicker(true)}
+            >
+              {time ? `🕐 ${time}` : '🕐 Выбрать время'}
+            </button>
+            {showTimePicker && (
+              <div className={styles.timePickerModal}>
+                <TimePicker
+                  value={time || '08:00'}
+                  onChange={setPickerTime}
+                  onConfirm={handleTimeConfirm}
+                />
+                <button className={styles.cancelBtn} style={{marginTop:8,width:'100%'}} onClick={() => setShowTimePicker(false)}>Отмена</button>
+              </div>
+            )}
             <input
               className={styles.inputFull}
               value={title}
