@@ -90,6 +90,29 @@ export function TimePicker({ value, onChange, onConfirm }) {
     onChange(timeStr);
   }, [hour, minute]);
 
+  // Manual input
+  const [manualInput, setManualInput] = useState(`${numToStr(hour)}:${numToStr(minute)}`);
+
+  function handleManualChange(e) {
+    const val = e.target.value;
+    setManualInput(val);
+    // Parse HH:MM
+    const match = val.match(/^(\d{1,2}):(\d{2})$/);
+    if (match) {
+      const h = parseInt(match[1]);
+      const m = parseInt(match[2]);
+      if (h >= 0 && h <= 23 && m >= 0 && m <= 59) {
+        setHour(h);
+        setMinute(m);
+      }
+    }
+  }
+
+  // Sync manual input when clock changes
+  useEffect(() => {
+    setManualInput(`${numToStr(hour)}:${numToStr(minute)}`);
+  }, [hour, minute]);
+
   // Hour markers
   const hourMarkers = [];
   // Outer ring: 12-23
@@ -145,6 +168,16 @@ export function TimePicker({ value, onChange, onConfirm }) {
           {numToStr(minute)}
         </button>
       </div>
+
+      {/* Manual keyboard input */}
+      <input
+        className={styles.manualInput}
+        value={manualInput}
+        onChange={handleManualChange}
+        placeholder="чч:мм"
+        maxLength={5}
+        inputMode="numeric"
+      />
 
       {/* Clock face */}
       <div className={styles.clockWrap}>

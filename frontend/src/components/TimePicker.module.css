@@ -39,6 +39,22 @@
   line-height: 1;
 }
 
+.manualInput {
+  width: 120px;
+  padding: 10px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  background: var(--bg);
+  outline: none;
+  text-align: center;
+  letter-spacing: 2px;
+  font-family: inherit;
+}
+.manualInput:focus { border-color: #34C759; }
+
 .clockWrap {
   width: 260px;
   height: 260px;
