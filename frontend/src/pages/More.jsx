@@ -3,6 +3,7 @@ import { api } from '../api/index.js';
 import { useTelegram } from '../hooks/useTelegram.js';
 import styles from './More.module.css';
 
+// ── SHARED ────────────────────────────────────────────────
 function Section({ title, onBack, children }) {
   return (
     <div className={styles.page}>
@@ -16,20 +17,76 @@ function Section({ title, onBack, children }) {
   );
 }
 
+function Empty({ icon, text, hint }) {
+  return (
+    <div className={styles.empty}>
+      <p style={{ fontSize: 48 }}>{icon}</p>
+      <p className={styles.emptyText}>{text}</p>
+      {hint && <p className={styles.emptyHint}>{hint}</p>}
+    </div>
+  );
+}
+
+// ── GOALS ─────────────────────────────────────────────────
 function Goals({ onBack }) {
   const [goals, setGoals] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState(null); // goal object being edited
+  const [editTitle, setEditTitle] = useState('');
+  const [editDesc, setEditDesc] = useState('');
+  const [editDeadline, setEditDeadline] = useState('');
 
-  useEffect(() => { api.getGoals().then(setGoals).catch(() => {}).finally(() => setLoading(false)); }, []);
+  useEffect(() => {
+    api.getGoals().then(setGoals).catch(() => {}).finally(() => setLoading(false));
+  }, []);
+
+  function startEdit(g) {
+    setEditing(g);
+    setEditTitle(g.title);
+    setEditDesc(g.description || '');
+    setEditDeadline(g.deadline ? g.deadline.split('T')[0] : '');
+  }
+
+  async function saveEdit() {
+    if (!editTitle.trim()) return;
+    // Use createGoal as upsert — delete old and create new to keep it simple
+    await api.deleteGoal(editing.id);
+    const newG = await api.createGoal({ title: editTitle, description: editDesc, deadline: editDeadline || null });
+    setGoals(g => [...g.filter(x => x.id !== editing.id), newG]);
+    setEditing(null);
+  }
 
   async function toggle(id, done) {
     setGoals(g => g.map(x => x.id === id ? { ...x, is_done: done } : x));
     await api.toggleGoal(id, done);
   }
+
   async function del(id) {
     setGoals(g => g.filter(x => x.id !== id));
     await api.deleteGoal(id);
   }
+
+  if (editing) return (
+    <div className={styles.page}>
+      <header className={styles.header}>
+        <button className={styles.back} onClick={() => setEditing(null)}>‹</button>
+        <h1 className={styles.title}>Редактировать цель</h1>
+        <div style={{ width: 40 }} />
+      </header>
+      <div className={styles.scroll}>
+        <div className={`card ${styles.editBlock}`}>
+          <p className={styles.editLabel}>Название</p>
+          <input className={styles.editInput} value={editTitle} onChange={e => setEditTitle(e.target.value)} autoFocus />
+          <p className={styles.editLabel}>Описание</p>
+          <textarea className={styles.editTa} value={editDesc} onChange={e => setEditDesc(e.target.value)} placeholder="Необязательно..." rows={3} />
+          <p className={styles.editLabel}>Дедлайн</p>
+          <input className={styles.editInput} type="date" value={editDeadline} onChange={e => setEditDeadline(e.target.value)} />
+          <button className={styles.saveBtnGreen} onClick={saveEdit} disabled={!editTitle.trim()} style={{ marginTop: 16 }}>Сохранить</button>
+        </div>
+        <div style={{ height: 24 }} />
+      </div>
+    </div>
+  );
 
   return (
     <Section title="Цели" onBack={onBack}>
@@ -45,7 +102,10 @@ function Goals({ onBack }) {
               {g.description && <p className={styles.itemSub}>{g.description}</p>}
               {g.deadline && <p className={styles.itemMeta}>📅 до {new Date(g.deadline).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })}</p>}
             </div>
-            <button className={styles.delBtn} onClick={() => del(g.id)}>🗑</button>
+            <div className={styles.itemActions}>
+              <button className={styles.editBtn} onClick={() => startEdit(g)}>✏️</button>
+              <button className={styles.delBtn} onClick={() => del(g.id)}>🗑</button>
+            </div>
           </div>
         ))
       }
@@ -54,17 +114,50 @@ function Goals({ onBack }) {
   );
 }
 
+// ── AFFIRMATIONS ──────────────────────────────────────────
 function Affirmations({ onBack }) {
   const [items, setItems] = useState([]);
   const [showAff, setShowAff] = useState(true);
   const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState(null);
+  const [editText, setEditText] = useState('');
 
   useEffect(() => {
-    api.getAffirmations().then(({ items, show }) => { setItems(items); setShowAff(show); }).catch(() => {}).finally(() => setLoading(false));
+    api.getAffirmations().then(({ items, show }) => {
+      setItems(items); setShowAff(show);
+    }).catch(() => {}).finally(() => setLoading(false));
   }, []);
+
+  function startEdit(a) { setEditing(a); setEditText(a.text); }
+
+  async function saveEdit() {
+    if (!editText.trim()) return;
+    await api.deleteAffirmation(editing.id);
+    const newA = await api.createAffirmation(editText);
+    setItems(a => [...a.filter(x => x.id !== editing.id), newA]);
+    setEditing(null);
+  }
 
   async function del(id) { setItems(a => a.filter(x => x.id !== id)); await api.deleteAffirmation(id); }
   async function toggleShow(val) { setShowAff(val); await api.setShowAffirmations(val); }
+
+  if (editing) return (
+    <div className={styles.page}>
+      <header className={styles.header}>
+        <button className={styles.back} onClick={() => setEditing(null)}>‹</button>
+        <h1 className={styles.title}>Редактировать</h1>
+        <div style={{ width: 40 }} />
+      </header>
+      <div className={styles.scroll}>
+        <div className={`card ${styles.editBlock}`}>
+          <p className={styles.editLabel}>Аффирмация</p>
+          <textarea className={styles.editTa} value={editText} onChange={e => setEditText(e.target.value)} autoFocus rows={4} />
+          <button className={styles.saveBtnGreen} onClick={saveEdit} disabled={!editText.trim()} style={{ marginTop: 16 }}>Сохранить</button>
+        </div>
+        <div style={{ height: 24 }} />
+      </div>
+    </div>
+  );
 
   return (
     <Section title="Аффирмации" onBack={onBack}>
@@ -82,7 +175,10 @@ function Affirmations({ onBack }) {
         items.map(a => (
           <div key={a.id} className={`card ${styles.textCard}`}>
             <p className={styles.textBody}>"{a.text}"</p>
-            <button className={styles.delBtn} onClick={() => del(a.id)}>🗑</button>
+            <div className={styles.itemActions}>
+              <button className={styles.editBtn} onClick={() => startEdit(a)}>✏️</button>
+              <button className={styles.delBtn} onClick={() => del(a.id)}>🗑</button>
+            </div>
           </div>
         ))
       }
@@ -91,22 +187,56 @@ function Affirmations({ onBack }) {
   );
 }
 
+// ── GRATITUDE ─────────────────────────────────────────────
 function Gratitude({ onBack }) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [text, setText] = useState('');
   const [saving, setSaving] = useState(false);
+  const [editing, setEditing] = useState(null);
+  const [editText, setEditText] = useState('');
 
-  useEffect(() => { api.getGratitude().then(setItems).catch(() => {}).finally(() => setLoading(false)); }, []);
+  useEffect(() => {
+    api.getGratitude().then(setItems).catch(() => {}).finally(() => setLoading(false));
+  }, []);
 
-  async function del(id) { setItems(g => g.filter(x => x.id !== id)); await api.deleteGratitude(id); }
   async function add() {
     if (!text.trim()) return;
     setSaving(true);
     try { const item = await api.createGratitude(text); setItems(g => [item, ...g]); setText(''); setShowForm(false); } catch {}
     setSaving(false);
   }
+
+  function startEdit(g) { setEditing(g); setEditText(g.text); }
+
+  async function saveEdit() {
+    if (!editText.trim()) return;
+    await api.deleteGratitude(editing.id);
+    const newG = await api.createGratitude(editText);
+    setItems(g => [newG, ...g.filter(x => x.id !== editing.id)]);
+    setEditing(null);
+  }
+
+  async function del(id) { setItems(g => g.filter(x => x.id !== id)); await api.deleteGratitude(id); }
+
+  if (editing) return (
+    <div className={styles.page}>
+      <header className={styles.header}>
+        <button className={styles.back} onClick={() => setEditing(null)}>‹</button>
+        <h1 className={styles.title}>Редактировать</h1>
+        <div style={{ width: 40 }} />
+      </header>
+      <div className={styles.scroll}>
+        <div className={`card ${styles.editBlock}`}>
+          <p className={styles.editLabel}>Благодарность</p>
+          <textarea className={styles.editTa} value={editText} onChange={e => setEditText(e.target.value)} autoFocus rows={4} />
+          <button className={styles.saveBtnGreen} onClick={saveEdit} disabled={!editText.trim()} style={{ marginTop: 16 }}>Сохранить</button>
+        </div>
+        <div style={{ height: 24 }} />
+      </div>
+    </div>
+  );
 
   return (
     <Section title="Благодарности" onBack={onBack}>
@@ -115,8 +245,7 @@ function Gratitude({ onBack }) {
       </button>
       {showForm && (
         <div className={`card ${styles.addForm}`}>
-          <textarea className={styles.textarea} value={text} onChange={e => setText(e.target.value)}
-            placeholder="Сегодня я благодарен за..." autoFocus rows={3} />
+          <textarea className={styles.editTa} value={text} onChange={e => setText(e.target.value)} placeholder="Сегодня я благодарен за..." autoFocus rows={3} />
           <button className={styles.saveBtnGreen} onClick={add} disabled={!text.trim() || saving}>
             {saving ? 'Сохраняю...' : 'Добавить'}
           </button>
@@ -130,7 +259,10 @@ function Gratitude({ onBack }) {
               <p className={styles.textBody}>{g.text}</p>
               <p className={styles.textDate}>{new Date(g.created_at).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })}</p>
             </div>
-            <button className={styles.delBtn} onClick={() => del(g.id)}>🗑</button>
+            <div className={styles.itemActions}>
+              <button className={styles.editBtn} onClick={() => startEdit(g)}>✏️</button>
+              <button className={styles.delBtn} onClick={() => del(g.id)}>🗑</button>
+            </div>
           </div>
         ))
       }
@@ -139,13 +271,71 @@ function Gratitude({ onBack }) {
   );
 }
 
+// ── HABITS ────────────────────────────────────────────────
+const EMOJIS = ['🎯','🧘','💧','📚','🏃','💪','🥗','🧠','✍️','🌿','☀️','🎵','😴','🚴','🧹','❤️'];
+const COLORS = ['#E8F8ED','#E8F0FE','#FFF3E0','#FCE4EC','#E3F2FD','#F3E5F5','#FFF8E1','#E0F7FA'];
+
 function Habits({ onBack }) {
   const [habits, setHabits] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState(null);
+  const [editName, setEditName] = useState('');
+  const [editIcon, setEditIcon] = useState('🎯');
+  const [editColor, setEditColor] = useState(COLORS[0]);
 
-  useEffect(() => { api.getHabits().then(setHabits).catch(() => {}).finally(() => setLoading(false)); }, []);
+  useEffect(() => {
+    api.getHabits().then(setHabits).catch(() => {}).finally(() => setLoading(false));
+  }, []);
 
-  async function del(id) { setHabits(h => h.filter(x => x.id !== id)); await api.deleteHabit(id); }
+  function startEdit(h) {
+    setEditing(h);
+    setEditName(h.name);
+    setEditIcon(h.icon);
+    setEditColor(h.color);
+  }
+
+  async function saveEdit() {
+    if (!editName.trim()) return;
+    await api.deleteHabit(editing.id);
+    const newH = await api.createHabit({ name: editName, icon: editIcon, color: editColor });
+    setHabits(h => [...h.filter(x => x.id !== editing.id), { ...newH, streak: editing.streak }]);
+    setEditing(null);
+  }
+
+  async function del(id) {
+    setHabits(h => h.filter(x => x.id !== id));
+    await api.deleteHabit(id);
+  }
+
+  if (editing) return (
+    <div className={styles.page}>
+      <header className={styles.header}>
+        <button className={styles.back} onClick={() => setEditing(null)}>‹</button>
+        <h1 className={styles.title}>Редактировать привычку</h1>
+        <div style={{ width: 40 }} />
+      </header>
+      <div className={styles.scroll}>
+        <div className={`card ${styles.editBlock}`}>
+          <p className={styles.editLabel}>Название</p>
+          <input className={styles.editInput} value={editName} onChange={e => setEditName(e.target.value)} autoFocus />
+          <p className={styles.editLabel}>Иконка</p>
+          <div className={styles.emojiGrid}>
+            {EMOJIS.map(e => (
+              <button key={e} className={`${styles.emojiBtn} ${editIcon===e?styles.emojiSel:''}`} onClick={() => setEditIcon(e)}>{e}</button>
+            ))}
+          </div>
+          <p className={styles.editLabel}>Цвет</p>
+          <div className={styles.colorRow}>
+            {COLORS.map(c => (
+              <button key={c} className={`${styles.colorDot} ${editColor===c?styles.colorSel:''}`} style={{background:c}} onClick={() => setEditColor(c)} />
+            ))}
+          </div>
+          <button className={styles.saveBtnGreen} onClick={saveEdit} disabled={!editName.trim()} style={{ marginTop: 16 }}>Сохранить</button>
+        </div>
+        <div style={{ height: 24 }} />
+      </div>
+    </div>
+  );
 
   return (
     <Section title="Привычки" onBack={onBack}>
@@ -158,7 +348,10 @@ function Habits({ onBack }) {
               <p className={styles.itemTitle}>{h.name}</p>
               <p className={styles.itemSub}>{Number(h.streak) > 0 ? `🔥 ${h.streak}-дневная серия` : 'Нет серии'}</p>
             </div>
-            <button className={styles.delBtn} onClick={() => del(h.id)}>🗑</button>
+            <div className={styles.itemActions}>
+              <button className={styles.editBtn} onClick={() => startEdit(h)}>✏️</button>
+              <button className={styles.delBtn} onClick={() => del(h.id)}>🗑</button>
+            </div>
           </div>
         ))
       }
@@ -167,16 +360,7 @@ function Habits({ onBack }) {
   );
 }
 
-function Empty({ icon, text, hint }) {
-  return (
-    <div className={styles.empty}>
-      <p style={{ fontSize: 48 }}>{icon}</p>
-      <p className={styles.emptyText}>{text}</p>
-      {hint && <p className={styles.emptyHint}>{hint}</p>}
-    </div>
-  );
-}
-
+// ── MAIN ─────────────────────────────────────────────────
 export function More() {
   const { user } = useTelegram();
   const [section, setSection] = useState(null);
@@ -202,10 +386,10 @@ export function More() {
         <p className={styles.secLabel}>Управление</p>
         <div className="card" style={{ margin: '0 14px 14px', overflow: 'hidden' }}>
           {[
-            { id: 'habits', icon: '✅', title: 'Привычки', sub: 'Управление и удаление' },
-            { id: 'goals', icon: '🎯', title: 'Цели', sub: 'Глобальные цели' },
-            { id: 'affirmations', icon: '✨', title: 'Аффирмации', sub: 'Позитивные установки' },
-            { id: 'gratitude', icon: '🙏', title: 'Благодарности', sub: 'Журнал благодарности' },
+            { id: 'habits', icon: '✅', title: 'Привычки', sub: 'Редактировать и удалять' },
+            { id: 'goals', icon: '🎯', title: 'Цели', sub: 'Редактировать и удалять' },
+            { id: 'affirmations', icon: '✨', title: 'Аффирмации', sub: 'Редактировать и удалять' },
+            { id: 'gratitude', icon: '🙏', title: 'Благодарности', sub: 'Редактировать и удалять' },
           ].map((item, i) => (
             <button key={item.id} className={`${styles.menuRow} ${i > 0 ? styles.bordered : ''}`} onClick={() => setSection(item.id)}>
               <span className={styles.menuIcon}>{item.icon}</span>
@@ -218,7 +402,7 @@ export function More() {
           ))}
         </div>
 
-        <p className={styles.version}>Трекер привычек</p>
+        <p className={styles.version}>Трекер привычек v2.0</p>
         <div style={{ height: 24 }} />
       </div>
     </div>

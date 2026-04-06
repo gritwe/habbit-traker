@@ -20,23 +20,29 @@
 .menuSub{display:block;font-size:12px;color:var(--text-muted);margin-top:1px;}
 .chevron{font-size:18px;color:var(--text-hint);}
 
+/* Item cards */
 .itemCard{display:flex;align-items:flex-start;gap:10px;padding:14px 16px;margin-bottom:8px;}
 .check{width:24px;height:24px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;background:white;transition:all 0.2s;}
 .checkOn{background:var(--green);border-color:var(--green);}
 .habitIcon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
-.itemInfo{flex:1;}
+.itemInfo{flex:1;min-width:0;}
 .itemTitle{font-size:15px;font-weight:600;color:var(--text);}
 .itemDone{text-decoration:line-through;color:var(--text-muted);}
 .itemSub{font-size:12px;color:var(--text-muted);margin-top:2px;}
 .itemMeta{font-size:11px;color:var(--text-hint);margin-top:4px;}
-.delBtn{font-size:18px;padding:4px;color:var(--text-hint);flex-shrink:0;}
-.delBtn:active{color:#FF3B30;}
+.itemActions{display:flex;gap:4px;flex-shrink:0;}
+.editBtn{font-size:16px;padding:6px;color:var(--text-muted);border-radius:8px;transition:background 0.15s;}
+.editBtn:active{background:var(--green-light);}
+.delBtn{font-size:16px;padding:6px;color:var(--text-muted);border-radius:8px;transition:background 0.15s;}
+.delBtn:active{color:#FF3B30;background:#fff0ef;}
 
-.textCard{display:flex;align-items:flex-start;gap:10px;padding:14px 16px;margin-bottom:8px;}
+/* Text cards (affirmations, gratitude) */
+.textCard{padding:14px 16px;margin-bottom:8px;display:flex;align-items:flex-start;gap:8px;}
 .textInfo{flex:1;}
 .textBody{font-size:15px;color:var(--text);line-height:1.4;}
 .textDate{font-size:11px;color:var(--text-hint);margin-top:4px;}
 
+/* Settings */
 .settingRow{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;margin-bottom:12px;}
 .setTitle{font-size:15px;font-weight:600;color:var(--text);}
 .setDesc{font-size:12px;color:var(--text-muted);margin-top:2px;}
@@ -45,13 +51,28 @@
 .toggleThumb{width:24px;height:24px;border-radius:50%;background:white;position:absolute;top:2px;left:2px;transition:left 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.2);}
 .toggleOn .toggleThumb{left:24px;}
 
-.addBanner{display:block;width:calc(100% - 0px);padding:13px 16px;background:var(--green-light);color:var(--green-dark);font-size:14px;font-weight:700;border-radius:14px;text-align:center;margin-bottom:10px;}
+/* Add/Edit forms */
+.addBanner{display:block;width:100%;padding:13px 16px;background:var(--green-light);color:var(--green-dark);font-size:14px;font-weight:700;border-radius:14px;text-align:center;margin-bottom:10px;}
 .addForm{padding:14px 16px;margin-bottom:10px;}
-.textarea{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:15px;color:var(--text);background:var(--bg);outline:none;resize:none;margin-bottom:10px;font-family:inherit;line-height:1.5;}
-.textarea:focus{border-color:var(--green);}
-.textarea::placeholder{color:var(--text-hint);}
-.saveBtnGreen{width:100%;padding:12px;border-radius:12px;font-size:15px;font-weight:700;color:white;background:var(--green);}
+.editBlock{padding:16px;margin-bottom:10px;}
+.editLabel{font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:6px;margin-top:14px;}
+.editLabel:first-child{margin-top:0;}
+.editInput{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:16px;color:var(--text);background:var(--bg);outline:none;font-family:inherit;}
+.editInput:focus{border-color:var(--green);}
+.editInput[type="date"]{color:var(--text);}
+.editTa{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:15px;color:var(--text);background:var(--bg);outline:none;resize:none;font-family:inherit;line-height:1.5;}
+.editTa:focus{border-color:var(--green);}
+.editTa::placeholder{color:var(--text-hint);}
+.saveBtnGreen{width:100%;padding:13px;border-radius:12px;font-size:15px;font-weight:700;color:white;background:var(--green);}
 .saveBtnGreen:disabled{opacity:0.4;}
+
+/* Emoji/color pickers */
+.emojiGrid{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:4px;}
+.emojiBtn{width:40px;height:40px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);font-size:18px;display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
+.emojiBtn.emojiSel{border-color:var(--green);background:var(--green-light);}
+.colorRow{display:flex;gap:10px;flex-wrap:wrap;}
+.colorDot{width:30px;height:30px;border-radius:50%;border:2px solid transparent;transition:all 0.15s;}
+.colorDot.colorSel{border-color:var(--green);transform:scale(1.2);}
 
 .empty{text-align:center;padding:60px 20px;}
 .emptyText{font-size:17px;font-weight:600;color:var(--text);margin-top:12px;}

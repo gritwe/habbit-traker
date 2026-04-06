@@ -22,6 +22,7 @@ export function App() {
   const [addOpen, setAddOpen] = useState(false);
   const [affirmation, setAffirmation] = useState(null);
   const [affShown, setAffShown] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
   useTelegram();
 
   useEffect(() => {
@@ -33,6 +34,18 @@ export function App() {
       setAffShown(true);
     }).catch(() => setAffShown(true));
   }, []);
+
+  function handleAddClose(added) {
+    setAddOpen(false);
+    // Always refresh page when menu closes - simplest reliable approach
+    setRefreshKey(k => k + 1);
+  }
+
+  function switchTab(id) {
+    setTab(id);
+    // Remount page on tab switch so data is always fresh
+    setRefreshKey(k => k + 1);
+  }
 
   return (
     <div className={styles.app}>
@@ -48,11 +61,11 @@ export function App() {
       )}
 
       <div className={styles.content}>
-        {tab === 'home' && <Home />}
-        {tab === 'journal' && <Journal />}
-        {tab === 'stats' && <Stats />}
-        {tab === 'calendar' && <CalendarPage />}
-        {tab === 'more' && <More />}
+        {tab === 'home' && <Home key={`home-${refreshKey}`} />}
+        {tab === 'journal' && <Journal key={`journal-${refreshKey}`} />}
+        {tab === 'stats' && <Stats key={`stats-${refreshKey}`} />}
+        {tab === 'calendar' && <CalendarPage key={`calendar-${refreshKey}`} />}
+        {tab === 'more' && <More key={`more-${refreshKey}`} />}
       </div>
 
       <nav className={styles.tabBar}>
@@ -63,7 +76,7 @@ export function App() {
             </button>
           );
           return (
-            <button key={t.id} className={`${styles.tabItem} ${tab === t.id ? styles.active : ''}`} onClick={() => setTab(t.id)}>
+            <button key={t.id} className={`${styles.tabItem} ${tab === t.id ? styles.active : ''}`} onClick={() => switchTab(t.id)}>
               <span className={styles.tabIcon}>{t.icon}</span>
               <span className={styles.tabLabel}>{t.label}</span>
             </button>
@@ -71,7 +84,7 @@ export function App() {
         })}
       </nav>
 
-      <AddMenu open={addOpen} onClose={() => setAddOpen(false)} />
+      <AddMenu open={addOpen} onClose={handleAddClose} />
     </div>
   );
 }

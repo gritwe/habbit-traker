@@ -5,7 +5,12 @@ import styles from './Home.module.css';
 
 const MONTHS = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
 
-function toStr(d) { return d.toISOString().split('T')[0]; }
+function toStr(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
 function fmtDate(s) {
   const d = new Date(s + 'T00:00:00');
   const today = toStr(new Date());
@@ -117,7 +122,18 @@ export function Home() {
             <button className={styles.todayBtn} onClick={() => setDate(toStr(new Date()))}>Сегодня</button>
           )}
         </div>
-        <button className={styles.dateNav} onClick={() => goDate(1)} disabled={isToday}>›</button>
+        <div className={styles.dateRight}>
+          <input
+            type="date"
+            className={styles.datePickerHidden}
+            max={toStr(new Date())}
+            value={date}
+            onChange={e => e.target.value && setDate(e.target.value)}
+            id="home-date-picker"
+          />
+          <label htmlFor="home-date-picker" className={styles.calIcon}>📆</label>
+          <button className={styles.dateNav} onClick={() => goDate(1)} disabled={isToday}>›</button>
+        </div>
       </div>
 
       {loading ? (

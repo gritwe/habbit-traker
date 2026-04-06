@@ -7,7 +7,12 @@ const MOODS = [{v:1,e:'😞'},{v:2,e:'😕'},{v:3,e:'😐'},{v:4,e:'😊'},{v:5,
 const MONTHS = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
 const WD = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 
-function toStr(d) { return d.toISOString().split('T')[0]; }
+function toStr(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
 
 const MONTHS_SHORT = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
 
@@ -106,7 +111,18 @@ function PlanDay() {
             <button className={styles.todayChip} onClick={() => setDate(todayStr)}>Сегодня</button>
           )}
         </div>
-        <button className={styles.dateNavBtn} onClick={() => goDate(1)} disabled={isToday}>›</button>
+        <div className={styles.dateNavRight}>
+          <input
+            type="date"
+            className={styles.datePickerHidden}
+            max={todayStr}
+            value={date}
+            onChange={e => { if (e.target.value) { setDate(e.target.value); setShowForm(false); } }}
+            id="plan-date-picker"
+          />
+          <label htmlFor="plan-date-picker" className={styles.calIcon}>📆</label>
+          <button className={styles.dateNavBtn} onClick={() => goDate(1)} disabled={isToday}>›</button>
+        </div>
       </div>
 
       {/* Timed schedule */}
