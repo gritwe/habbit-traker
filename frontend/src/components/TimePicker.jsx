@@ -153,7 +153,6 @@ export function TimePicker({ value, onChange, onConfirm }) {
   return (
     <div className={styles.wrap}>
 
-
       {/* Manual keyboard input */}
       <input
         className={styles.manualInput}

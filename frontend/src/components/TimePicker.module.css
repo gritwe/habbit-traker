@@ -6,39 +6,6 @@
   padding: 16px 0 8px;
 }
 
-.digital {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  background: var(--bg);
-  border-radius: 16px;
-  padding: 8px 16px;
-}
-
-.digitalPart {
-  font-size: 42px;
-  font-weight: 700;
-  color: var(--text-muted);
-  padding: 4px 10px;
-  border-radius: 10px;
-  transition: all 0.15s;
-  line-height: 1;
-  min-width: 64px;
-  text-align: center;
-}
-
-.digitalPart.digitalActive {
-  color: white;
-  background: #34C759;
-}
-
-.digitalColon {
-  font-size: 42px;
-  font-weight: 700;
-  color: var(--text-muted);
-  line-height: 1;
-}
-
 .manualInput {
   width: 120px;
   padding: 10px 14px;
