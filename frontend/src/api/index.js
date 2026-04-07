@@ -11,10 +11,10 @@ async function req(path, opts = {}) {
 const j = (d) => JSON.stringify(d);
 
 export const api = {
-  getHabits: () => req('/habits'),
+  getHabits: (date) => req(`/habits${date ? `?date=${date}` : ''}`),
   createHabit: (d) => req('/habits', { method: 'POST', body: j(d) }),
   deleteHabit: (id) => req(`/habits/${id}`, { method: 'DELETE' }),
-  toggleHabit: (id) => req(`/habits/${id}/toggle`, { method: 'POST' }),
+  toggleHabit: (id, date) => req(`/habits/${id}/toggle`, { method: 'POST', body: j({ date }) }),
 
   getGoals: () => req('/goals'),
   createGoal: (d) => req('/goals', { method: 'POST', body: j(d) }),

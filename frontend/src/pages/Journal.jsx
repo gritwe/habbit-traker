@@ -222,13 +222,18 @@ function PlanDay() {
 
       {/* Note */}
       <div className={`card ${styles.block}`}>
-        <p className={styles.blockTitle}>Заметка дня</p>
+        <div className={styles.blockHeader}>
+          <p className={styles.blockTitle}>Заметка дня</p>
+          <button className={styles.editNoteBtn} onClick={() => { setSaved(false); }}>Изменить</button>
+        </div>
         <textarea
           className={styles.noteArea}
           value={note}
           onChange={e => { setNote(e.target.value); setSaved(false); }}
           placeholder="Что запомнилось, мысли, события..."
           rows={4}
+          spellCheck={true}
+          lang="ru"
         />
         <button className={styles.saveNoteBtn} onClick={saveNote} disabled={saving}>
           {saved ? '✓ Сохранено' : saving ? 'Сохраняю...' : 'Сохранить'}
@@ -358,7 +363,6 @@ function Tasks() {
         <div className={styles.taskHeader}>
           <div>
             <p className={styles.blockTitle}>{selLabel}</p>
-            {tasks.length > 0 && <p className={styles.taskSub}>{done}/{tasks.length} · {pct}%</p>}
           </div>
           <button className={styles.addTaskChip} onClick={() => setShowForm(v => !v)}>
             {showForm ? '✕' : '+ Задача'}
@@ -380,6 +384,8 @@ function Tasks() {
               onChange={e => setTitle(e.target.value)}
               placeholder="Название задачи..."
               autoFocus
+              spellCheck={true}
+              lang="ru"
               onKeyDown={e => e.key === 'Enter' && addTask()}
             />
             <div className={styles.formBtns}>

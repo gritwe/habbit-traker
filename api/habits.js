@@ -21,7 +21,9 @@ module.exports = async function handler(req, res) {
 
   // POST /api/habits/:id/toggle
   if (req.method === 'POST' && id && action === 'toggle') {
-    const today = new Date().toISOString().split('T')[0];
+    // Accept date from body, fallback to today in user's timezone
+    const bodyDate = req.body?.date;
+    const today = bodyDate || new Date().toISOString().split('T')[0];
     const ex = await pool.query(
       `SELECT id FROM habit_logs WHERE habit_id=$1 AND completed_date=$2`, [id, today]
     );
@@ -45,7 +47,8 @@ module.exports = async function handler(req, res) {
 
   // GET /api/habits — with real consecutive streak
   if (req.method === 'GET') {
-    const today = new Date().toISOString().split('T')[0];
+    const dateParam = url.searchParams.get('date');
+    const today = dateParam || new Date().toISOString().split('T')[0];
     const { rows: habits } = await pool.query(
       `SELECT h.id, h.name, h.icon, h.color,
         COALESCE((SELECT TRUE FROM habit_logs l WHERE l.habit_id=h.id AND l.completed_date=$2),FALSE) AS completed_today

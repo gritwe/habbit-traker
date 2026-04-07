@@ -20,7 +20,7 @@ function HabitForm({ onDone, onClose }) {
 
   return (
     <div className={styles.form}>
-      <input className={styles.input} value={name} onChange={e => setName(e.target.value)} placeholder="Название привычки..." autoFocus maxLength={50} onKeyDown={e => e.key === 'Enter' && save()} />
+      <input className={styles.input} value={name} onChange={e => setName(e.target.value)} placeholder="Название привычки..." spellCheck={true} lang="ru" autoFocus maxLength={50} onKeyDown={e => e.key === 'Enter' && save()} />
       <p className={styles.label}>Иконка</p>
       <div className={styles.emojiGrid}>
         {EMOJIS.map(e => <button key={e} className={`${styles.emojiBtn} ${icon===e?styles.sel:''}`} onClick={() => setIcon(e)}>{e}</button>)}
@@ -49,7 +49,7 @@ function GoalForm({ onDone }) {
 
   return (
     <div className={styles.form}>
-      <input className={styles.input} value={title} onChange={e => setTitle(e.target.value)} placeholder="Название цели..." autoFocus maxLength={80} />
+      <input className={styles.input} value={title} onChange={e => setTitle(e.target.value)} placeholder="Название цели..." spellCheck={true} lang="ru" autoFocus maxLength={80} />
       <textarea className={styles.textarea} value={desc} onChange={e => setDesc(e.target.value)} placeholder="Описание (необязательно)..." rows={3} />
       <p className={styles.label}>Дедлайн (необязательно)</p>
       <input className={styles.input} type="date" value={deadline} onChange={e => setDeadline(e.target.value)} />
@@ -71,7 +71,7 @@ function AffirmationForm({ onDone }) {
 
   return (
     <div className={styles.form}>
-      <textarea className={styles.textarea} value={text} onChange={e => setText(e.target.value)} placeholder="Я уверен в себе и своих силах..." autoFocus rows={4} />
+      <textarea className={styles.textarea} value={text} onChange={e => setText(e.target.value)} spellCheck={true} lang="ru" placeholder="Я уверен в себе и своих силах..." autoFocus rows={4} />
       <p className={styles.hint}>Аффирмации будут показываться при входе в приложение случайно</p>
       <button className="btn-primary" onClick={save} disabled={!text.trim()||saving}>{saving?'Сохраняю...':'Добавить аффирмацию'}</button>
     </div>
@@ -91,7 +91,7 @@ function GratitudeForm({ onDone }) {
 
   return (
     <div className={styles.form}>
-      <textarea className={styles.textarea} value={text} onChange={e => setText(e.target.value)} placeholder="Сегодня я благодарен за..." autoFocus rows={4} />
+      <textarea className={styles.textarea} value={text} onChange={e => setText(e.target.value)} spellCheck={true} lang="ru" placeholder="Сегодня я благодарен за..." autoFocus rows={4} />
       <button className="btn-primary" onClick={save} disabled={!text.trim()||saving}>{saving?'Сохраняю...':'Добавить'}</button>
     </div>
   );
@@ -109,12 +109,12 @@ export function AddMenu({ open, onClose }) {
 
   function handleDone() {
     setActive(null);
-    onClose();
+    onClose(true); // true = something was added, trigger refresh
   }
 
   function handleClose() {
     setActive(null);
-    onClose();
+    onClose(false); // false = just closed, no refresh needed
   }
 
   return (

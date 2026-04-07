@@ -56,7 +56,7 @@ export function Home() {
     setLoading(true);
     try {
       const [h, g, t, aff, grat] = await Promise.all([
-        api.getHabits(),
+        api.getHabits(d),
         api.getGoals(),
         api.getDayTasks(d),
         api.getAffirmations(),
@@ -76,7 +76,7 @@ export function Home() {
   async function handleToggleHabit(id) {
     haptic?.impactOccurred('light');
     setHabits(h => h.map(x => x.id === id ? { ...x, completed_today: !x.completed_today } : x));
-    try { await api.toggleHabit(id); } catch { load(date); }
+    try { await api.toggleHabit(id, date); } catch { load(date); }
   }
 
   async function handleToggleGoal(id, done) {
