@@ -42,29 +42,16 @@ function PlanDay() {
   const [addSaving, setAddSaving] = useState(false);
   const { haptic } = useTelegram();
 
-  // ── Загрузка данных по дате ──
   useEffect(() => {
-    setMood(null);
-    setTimedTasks([]);
-    setSaved(false);
-
-    api.getJournal(date)
-      .then(data => {
-        if (data) {
-          setMood(data.mood);
-          setNote(data.note || '');
-        } else {
-          setNote('');
-        }
-      })
-      .catch(err => console.error('Ошибка загрузки журнала:', err));
-
-    api.getDayTasks(date)
-      .then(all => setTimedTasks(all.filter(t => t.time_start)))
-      .catch(err => console.error('Ошибка загрузки задач:', err));
+    setMood(null); setNote(''); setTimedTasks([]); setSaved(false);
+    api.getJournal(date).then(data => {
+      if (data) { setMood(data.mood); setNote(data.note || ''); }
+    }).catch(() => {});
+    api.getDayTasks(date).then(all => {
+      setTimedTasks(all.filter(t => t.time_start));
+    }).catch(() => {});
   }, [date]);
 
-  // ── Переключение дат ──
   function goDate(delta) {
     const d = new Date(date + 'T00:00:00');
     d.setDate(d.getDate() + delta);
@@ -76,33 +63,22 @@ function PlanDay() {
 
   const isToday = date === todayStr;
 
-  // ── Сохранение настроения ──
   async function handleMood(v) {
     setMood(v);
     haptic?.impactOccurred('light');
-    try {
-      await api.saveJournal({ entry_date: date, mood: v }); // note не трогаем
-    } catch (err) {
-      console.error('Ошибка сохранения настроения:', err);
-    }
+    await api.saveJournal({ entry_date: date, mood: v, note });
   }
 
-  // ── Сохранение заметки ──
   async function saveNote() {
-    if (!note.trim()) return; // пустые заметки не сохраняем
     setSaving(true);
     try {
-      await api.saveJournal({ entry_date: date, note });
+      await api.saveJournal({ entry_date: date, mood, note });
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
-    } catch (err) {
-      console.error('Ошибка сохранения заметки:', err);
-    } finally {
-      setSaving(false);
-    }
+    } catch {}
+    setSaving(false);
   }
 
-  // ── Остальные функции: добавление/удаление задач ──
   async function addTimedTask() {
     if (!title.trim() || !time) return;
     setAddSaving(true);
@@ -111,25 +87,28 @@ function PlanDay() {
       setTimedTasks(ts => [...ts, t].sort((a,b) => a.time_start.localeCompare(b.time_start)));
       setTitle(''); setTime(''); setShowForm(false);
       haptic?.impactOccurred('light');
-    } catch (err) {
-      console.error('Ошибка добавления задачи:', err);
-    }
+    } catch {}
     setAddSaving(false);
   }
 
   async function toggleTimedTask(id, done) {
     haptic?.impactOccurred('light');
     setTimedTasks(ts => ts.map(x => x.id === id ? {...x, is_done: done} : x));
-    try { await api.toggleDayTask(id, done); } catch(err){ console.error(err); }
+    await api.toggleDayTask(id, done);
   }
 
   async function deleteTimedTask(id) {
     setTimedTasks(ts => ts.filter(x => x.id !== id));
-    try { await api.deleteDayTask(id); } catch(err){ console.error(err); }
+    await api.deleteDayTask(id);
   }
 
-  const swipe = useSwipe(() => goDate(1), () => goDate(-1));
+  const swipe = useSwipe(
+    () => goDate(1),
+    () => goDate(-1),
+  );
+
   const [showTimePicker, setShowTimePicker] = useState(false);
+  const [pickerTime, setPickerTime] = useState('08:00');
 
   function handleTimeConfirm(t) {
     setTime(t);
@@ -140,47 +119,123 @@ function PlanDay() {
     <div className={styles.scroll} {...swipe}>
       {/* Date nav */}
       <div className={styles.dateNav}>
-        <button onClick={() => goDate(-1)}>‹</button>
-        <div>{fmtDateShort(date)} {!isToday && <button onClick={() => setDate(todayStr)}>Сегодня</button>}</div>
-        <button onClick={() => goDate(1)} disabled={isToday}>›</button>
+        <button className={styles.dateNavBtn} onClick={() => goDate(-1)}>‹</button>
+        <div className={styles.dateNavCenter}>
+          <span className={styles.dateNavLabel}>{fmtDateShort(date)}</span>
+          {!isToday && (
+            <button className={styles.todayChip} onClick={() => setDate(todayStr)}>Сегодня</button>
+          )}
+        </div>
+        <div className={styles.dateNavRight}>
+          <input
+            type="date"
+            className={styles.datePickerHidden}
+            max={todayStr}
+            value={date}
+            onChange={e => { if (e.target.value) { setDate(e.target.value); setShowForm(false); } }}
+            id="plan-date-picker"
+          />
+          <label htmlFor="plan-date-picker" className={styles.calIcon}>📆</label>
+          <button className={styles.dateNavBtn} onClick={() => goDate(1)} disabled={isToday}>›</button>
+        </div>
       </div>
 
-      {/* Timed tasks */}
+      {/* Timed schedule */}
       <div className={`card ${styles.block}`}>
-        <div>
-          <p>📅 Расписание дня</p>
-          <button onClick={() => setShowForm(v => !v)}>{showForm ? '✕' : '+ Добавить'}</button>
+        <div className={styles.blockHeader}>
+          <p className={styles.blockTitle}>📅 Расписание дня</p>
+          <button className={styles.addRowBtn} onClick={() => setShowForm(v => !v)}>
+            {showForm ? '✕' : '+ Добавить'}
+          </button>
         </div>
+
+        {/* Add form — full width, time on top, title below, then buttons */}
         {showForm && (
-          <div>
-            <button onClick={() => setShowTimePicker(true)}>{time || '🕐 Выбрать время'}</button>
-            {showTimePicker && <TimePicker value={time || '08:00'} onChange={setTime} onConfirm={handleTimeConfirm} />}
-            <input value={title} onChange={e => setTitle(e.target.value)} placeholder="Название задачи..." onKeyDown={e => e.key==='Enter' && addTimedTask()}/>
-            <button onClick={addTimedTask} disabled={!title.trim() || !time || addSaving}>{addSaving ? '...' : 'Добавить'}</button>
+          <div className={styles.addFormFull}>
+            <button
+              className={styles.timePickerBtn}
+              onClick={() => setShowTimePicker(true)}
+            >
+              {time ? `🕐 ${time}` : '🕐 Выбрать время'}
+            </button>
+            {showTimePicker && (
+              <div className={styles.timePickerModal}>
+                <TimePicker
+                  value={time || '08:00'}
+                  onChange={setPickerTime}
+                  onConfirm={handleTimeConfirm}
+                />
+                <button className={styles.cancelBtn} style={{marginTop:8,width:'100%'}} onClick={() => setShowTimePicker(false)}>Отмена</button>
+              </div>
+            )}
+            <input
+              className={styles.inputFull}
+              value={title}
+              onChange={e => setTitle(e.target.value)}
+              placeholder="Название задачи..."
+              onKeyDown={e => e.key === 'Enter' && addTimedTask()}
+            />
+            <div className={styles.formBtns}>
+              <button className={styles.cancelBtn} onClick={() => { setShowForm(false); setTitle(''); setTime(''); }}>Отмена</button>
+              <button className={styles.saveBtnGreen} onClick={addTimedTask} disabled={!title.trim() || !time || addSaving}>
+                {addSaving ? '...' : 'Добавить'}
+              </button>
+            </div>
           </div>
         )}
-        {timedTasks.map(t => (
-          <div key={t.id}>
-            <button onClick={() => toggleTimedTask(t.id, !t.is_done)}>{t.is_done ? '✓' : ''}</button>
-            {t.title}
-            <button onClick={() => deleteTimedTask(t.id)}>✕</button>
-          </div>
-        ))}
+
+        {timedTasks.length === 0 && !showForm
+          ? <p className={styles.emptyHint}>Добавь задачи со временем — нажми «+ Добавить»</p>
+          : (
+            <div className={styles.timeline}>
+              {timedTasks.map(t => (
+                <div key={t.id} className={styles.timelineItem}>
+                  <div className={styles.timelineLeft}>
+                    <span className={styles.timeTag}>{t.time_start.slice(0,5)}</span>
+                    <div className={styles.timelineLine} />
+                  </div>
+                  <div className={`${styles.timelineCard} ${t.is_done ? styles.timelineCardDone : ''}`}>
+                    <button className={`${styles.tlCheck} ${t.is_done ? styles.tlCheckOn : ''}`} onClick={() => toggleTimedTask(t.id, !t.is_done)}>
+                      {t.is_done && <svg width="9" height="7" viewBox="0 0 9 7" fill="none"><path d="M1 3L3.5 5.5L8 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                    </button>
+                    <span className={`${styles.tlTitle} ${t.is_done ? styles.tlDone : ''}`}>{t.title}</span>
+                    <button className={styles.tlDel} onClick={() => deleteTimedTask(t.id)}>✕</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )
+        }
       </div>
 
-      {/* Mood */}
+      {/* Mood — with gaps */}
       <div className={`card ${styles.block}`}>
-        <p>Как прошёл день?</p>
-        {MOODS.map(m => (
-          <button key={m.v} className={mood===m.v ? styles.moodSel : ''} onClick={() => handleMood(m.v)}>{m.e}</button>
-        ))}
+        <p className={styles.blockTitle}>Как прошёл день?</p>
+        <div className={styles.moodRow}>
+          {MOODS.map(m => (
+            <button key={m.v} className={`${styles.moodBtn} ${mood === m.v ? styles.moodSel : ''}`} onClick={() => handleMood(m.v)}>
+              <span className={styles.moodEmoji}>{m.e}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Note */}
       <div className={`card ${styles.block}`}>
-        <textarea value={note} onChange={e => { setNote(e.target.value); setSaved(false); }} placeholder="Что запомнилось..." />
-        <button onClick={saveNote} disabled={saving}>{saved ? '✓ Сохранено' : saving ? 'Сохраняю...' : 'Сохранить'}</button>
+        <p className={styles.blockTitle}>Заметка дня</p>
+        <textarea
+          className={styles.noteArea}
+          value={note}
+          onChange={e => { setNote(e.target.value); setSaved(false); }}
+          placeholder="Что запомнилось, мысли, события..."
+          rows={4}
+        />
+        <button className={styles.saveNoteBtn} onClick={saveNote} disabled={saving}>
+          {saved ? '✓ Сохранено' : saving ? 'Сохраняю...' : 'Сохранить'}
+        </button>
       </div>
+
+      <div style={{ height: 24 }} />
     </div>
   );
 }
