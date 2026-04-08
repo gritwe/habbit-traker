@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { api } from '../api/index.js';
 import { useTelegram } from '../hooks/useTelegram.js';
 import { useSwipe } from '../hooks/useSwipe.js';
@@ -42,10 +42,26 @@ function PlanDay() {
   const [addSaving, setAddSaving] = useState(false);
   const { haptic } = useTelegram();
 
+  // Refs for sync access in async save functions
+  const moodRef = useRef(mood);
+  const noteRef = useRef(note);
+  const dateRef = useRef(date);
+
+  useEffect(() => { moodRef.current = mood; }, [mood]);
+  useEffect(() => { noteRef.current = note; }, [note]);
+  useEffect(() => { dateRef.current = date; }, [date]);
+
   useEffect(() => {
     setMood(null); setNote(''); setTimedTasks([]); setSaved(false);
     api.getJournal(date).then(data => {
-      if (data) { setMood(data.mood); setNote(data.note || ''); }
+      if (data) {
+        const m = data.mood || null;
+        const n = data.note || '';
+        setMood(m);
+        setNote(n);
+        moodRef.current = m;
+        noteRef.current = n;
+      }
     }).catch(() => {});
     api.getDayTasks(date).then(all => {
       setTimedTasks(all.filter(t => t.time_start));
@@ -65,14 +81,19 @@ function PlanDay() {
 
   async function handleMood(v) {
     setMood(v);
+    moodRef.current = v;
     haptic?.impactOccurred('light');
-    await api.saveJournal({ entry_date: date, mood: v, note });
+    try {
+      // Only send mood — don't overwrite note
+      await api.saveJournal({ entry_date: dateRef.current, mood: v });
+    } catch {}
   }
 
   async function saveNote() {
     setSaving(true);
     try {
-      await api.saveJournal({ entry_date: date, mood, note });
+      // Only send note — don't overwrite mood
+      await api.saveJournal({ entry_date: dateRef.current, note: noteRef.current });
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     } catch {}
@@ -222,13 +243,18 @@ function PlanDay() {
 
       {/* Note */}
       <div className={`card ${styles.block}`}>
-        <p className={styles.blockTitle}>Заметка дня</p>
+        <div className={styles.blockHeader}>
+          <p className={styles.blockTitle}>Заметка дня</p>
+          <button className={styles.editNoteBtn} onClick={() => { setSaved(false); }}>Изменить</button>
+        </div>
         <textarea
           className={styles.noteArea}
           value={note}
           onChange={e => { setNote(e.target.value); setSaved(false); }}
           placeholder="Что запомнилось, мысли, события..."
           rows={4}
+          spellCheck={true}
+          lang="ru"
         />
         <button className={styles.saveNoteBtn} onClick={saveNote} disabled={saving}>
           {saved ? '✓ Сохранено' : saving ? 'Сохраняю...' : 'Сохранить'}
@@ -293,12 +319,6 @@ function Tasks() {
     setSaving(false);
   }
 
-  async function toggleTask(id, done) {
-    haptic?.impactOccurred('light');
-    setTasks(ts => ts.map(x => x.id === id ? {...x, is_done: done} : x));
-    await api.toggleDayTask(id, done);
-  }
-
   async function deleteTask(id) {
     const newTasks = tasks.filter(x => x.id !== id);
     setTasks(newTasks);
@@ -358,20 +378,12 @@ function Tasks() {
         <div className={styles.taskHeader}>
           <div>
             <p className={styles.blockTitle}>{selLabel}</p>
-            {tasks.length > 0 && <p className={styles.taskSub}>{done}/{tasks.length} · {pct}%</p>}
           </div>
           <button className={styles.addTaskChip} onClick={() => setShowForm(v => !v)}>
             {showForm ? '✕' : '+ Задача'}
           </button>
         </div>
 
-        {tasks.length > 0 && (
-          <div className={styles.miniBar}>
-            <div className={styles.miniBarFill} style={{width:`${pct}%`}} />
-          </div>
-        )}
-
-        {/* Full-width form */}
         {showForm && (
           <div className={styles.addFormFull}>
             <input
@@ -380,6 +392,8 @@ function Tasks() {
               onChange={e => setTitle(e.target.value)}
               placeholder="Название задачи..."
               autoFocus
+              spellCheck={true}
+              lang="ru"
               onKeyDown={e => e.key === 'Enter' && addTask()}
             />
             <div className={styles.formBtns}>
@@ -396,15 +410,15 @@ function Tasks() {
         ) : tasks.length === 0 && !showForm ? (
           <p className={styles.emptyHint}>Нет задач на этот день</p>
         ) : (
-          tasks.map(t => (
-            <div key={t.id} className={styles.taskRow}>
-              <button className={`${styles.taskCheck} ${t.is_done ? styles.taskCheckOn : ''}`} onClick={() => toggleTask(t.id, !t.is_done)}>
-                {t.is_done && <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 3.5L3.5 6L9 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
-              </button>
-              <span className={`${styles.taskTitle} ${t.is_done ? styles.taskDone : ''}`}>{t.title}</span>
-              <button className={styles.taskDel} onClick={() => deleteTask(t.id)}>✕</button>
-            </div>
-          ))
+          <div className={styles.simpleTaskList}>
+            {tasks.map(t => (
+              <div key={t.id} className={styles.simpleTaskRow}>
+                <span className={styles.simpleBullet}>•</span>
+                <span className={styles.simpleTaskTitle}>{t.title}</span>
+                <button className={styles.taskDel} onClick={() => deleteTask(t.id)}>✕</button>
+              </div>
+            ))}
+          </div>
         )}
       </div>
 
