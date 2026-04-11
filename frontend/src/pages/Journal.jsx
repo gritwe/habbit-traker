@@ -250,7 +250,6 @@ function PlanDay() {
                   className={`${styles.moodBtn} ${mood === m.v ? styles.moodSel : ''}`}
                   onClick={() => handleMood(m.v)}>
                   <span className={styles.moodEmoji}>{m.e}</span>
-                  <span className={styles.moodNum}>{m.label}</span>
                 </button>
               ))}
             </div>
