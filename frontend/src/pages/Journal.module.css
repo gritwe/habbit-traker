@@ -29,52 +29,11 @@
 /* Timeline */
 .timeline { display:flex;flex-direction:column; }
 .timelineItem { display:flex;gap:0;align-items:stretch;min-height:52px; }
-
-.timelineItem {
-  display: flex;
-  align-items: stretch;
-  position: relative;
-}
-
-/* левая колонка */
-.timelineLeft {
-  position: relative;
-  width: 52px;
-  display: flex;
-  justify-content: flex-start;
-}
-
-/* время — без лишних отступов */
-.timeTag {
-  padding: 12px 0 4px;
-  margin: 0;
-}
-
-/* линия теперь абсолютная и идеально центрируется */
-.timelineLine {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 2px;
-  background: var(--border);
-  border-radius: 1px;
-  z-index: 0;
-}
-
-/* карточка поверх линии */
-.timelineCard {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--bg);
-  border-radius: 10px;
-  padding: 10px 12px;
-  margin-bottom: 8px;
-  z-index: 1;
-}
+.timelineLeft{display:flex;flex-direction:column;align-items:center;width:52px;flex-shrink:0;} 
+.timeTag{font-size:12px;font-weight:700;color:#007AFF;flex-shrink:0;margin:0;padding:12.5px 0 4px;} 
+.timelineLine{flex:1;width:2px;background:var(--border);border-radius:1px;}
+.timelineCard { flex:1;display:flex;align-items:center;gap:8px;background:var(--bg);border-radius:10px;padding:10px 12px;margin-bottom:8px;transition:opacity 0.15s; }
+.timelineCard.timelineCardDone { opacity:0.55; }
 .tlCheck { width:20px;height:20px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.2s;background:white; }
 .tlCheckOn { background:var(--green);border-color:var(--green); }
 .tlTitle { flex:1;font-size:14px;font-weight:500;color:var(--text); }
