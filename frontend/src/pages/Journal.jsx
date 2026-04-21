@@ -78,9 +78,7 @@ function PlanDay() {
   function goDate(delta) {
     const d = new Date(date + 'T00:00:00');
     d.setDate(d.getDate() + delta);
-    const next = toStr(d);
-    if (next > todayStr) return;
-    setDate(next);
+    setDate(toStr(d));
     setShowForm(false);
   }
 
@@ -157,7 +155,7 @@ function PlanDay() {
     <div className={styles.scroll} {...swipe}>
       {/* Date nav */}
       <div className={styles.dateNav}>
-        <button className={styles.dateNavBtn} onClick={() => goDate(-1)}>‹</button>
+        <button className={styles.dateNavBtn} onClick={() => goDate(1)}>›</button>
         <div className={styles.dateNavCenter}>
           <span className={styles.dateNavLabel}>{fmtDateShort(date)}</span>
           {!isToday && (
@@ -165,9 +163,9 @@ function PlanDay() {
           )}
         </div>
         <div className={styles.dateNavRight}>
-          <input type="date" className={styles.datePickerHidden} max={todayStr} value={date}
-            onChange={e => { if (e.target.value) { setDate(e.target.value); setShowForm(false); } }}
-            id="plan-date-picker" />
+          <input type="date" className={styles.datePickerHidden} value={date}
+  onChange={e => { if (e.target.value) { setDate(e.target.value); setShowForm(false); } }}
+  id="plan-date-picker" />
           <label htmlFor="plan-date-picker" className={styles.calIcon}>📆</label>
           <button className={styles.dateNavBtn} onClick={() => goDate(1)} disabled={isToday}>›</button>
         </div>
