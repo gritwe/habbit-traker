@@ -154,22 +154,23 @@ function PlanDay() {
   return (
     <div className={styles.scroll} {...swipe}>
       {/* Date nav */}
+      {/* Date nav */}
       <div className={styles.dateNav}>
-        <button className={styles.dateNavBtn} onClick={() => goDate(1)}>›</button>
-        <div className={styles.dateNavCenter}>
-          <span className={styles.dateNavLabel}>{fmtDateShort(date)}</span>
-          {!isToday && (
-            <button className={styles.todayChip} onClick={() => setDate(todayStr)}>Сегодня</button>
-          )}
-        </div>
-        <div className={styles.dateNavRight}>
-          <input type="date" className={styles.datePickerHidden} value={date}
-  onChange={e => { if (e.target.value) { setDate(e.target.value); setShowForm(false); } }}
-  id="plan-date-picker" />
-          <label htmlFor="plan-date-picker" className={styles.calIcon}>📆</label>
-          <button className={styles.dateNavBtn} onClick={() => goDate(1)} disabled={isToday}>›</button>
-        </div>
-      </div>
+                <button className={styles.dateNavBtn} onClick={() => goDate(-1)}>‹</button>
+                        <div className={styles.dateNavCenter}>
+                                  <span className={styles.dateNavLabel}>{fmtDateShort(date)}</span>
+                                            {!isToday && (
+                                                        <button className={styles.todayChip} onClick={() => setDate(todayStr)}>Сегодня</button>
+                                                                  )}
+                                                                          </div>
+                                                                                  <div className={styles.dateNavRight}>
+                                                                                            <input type="date" className={styles.datePickerHidden} value={date}
+                                                                                                        onChange={e => { if (e.target.value) { setDate(e.target.value); setShowForm(false); } }}
+                                                                                                                    id="plan-date-picker" />
+                                                                                                                              <label htmlFor="plan-date-picker" className={styles.calIcon}>📆</label>
+                                                                                                                                        <button className={styles.dateNavBtn} onClick={() => goDate(1)}>›</button>
+                                                                                                                                                </div>
+                                                                                                                                                      </div>
 
       {loading ? (
         <div className={styles.loadingWrap}><div className="spinner" /></div>
